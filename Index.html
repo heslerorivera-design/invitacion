@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tengo algo que decirle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night-1:#2a1230;
+    --night-2:#150a1c;
+    --night-3:#3d1a3a;
+    --paper:#fdf8f1;
+    --paper-2:#f3e9dc;
+    --ink:#2e1b2b;
+    --ink-soft:#8a7080;
+    --gold:#b8913f;
+    --gold-soft:#e0c88a;
+    --rose:#9e3550;
+    --rose-dark:#7d2740;
+    --rose-tint:rgba(158,53,80,0.08);
+    --line:rgba(46,27,43,0.18);
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{ margin:0; min-height:100%; }
+
+  body{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:28px 16px;
+    background:
+      radial-gradient(ellipse at 25% 15%, var(--night-3) 0%, transparent 55%),
+      radial-gradient(ellipse at 80% 85%, #4a1f3d 0%, transparent 50%),
+      linear-gradient(165deg, var(--night-1), var(--night-2));
+    background-size: 200% 200%, 200% 200%, 100% 100%;
+    animation: drift 24s ease-in-out infinite alternate;
+    font-family:"Jost", -apple-system, BlinkMacSystemFont, sans-serif;
+    color:var(--ink);
+    overflow-x:hidden;
+  }
+
+  @keyframes drift{
+    0%   { background-position: 0% 0%, 100% 100%, 0 0; }
+    100% { background-position: 30% 25%, 70% 70%, 0 0; }
+  }
+
+  /* ---- Petalos flotantes ---- */
+  .petals{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:0;
+  }
+  .petal{
+    position:absolute;
+    top:-8vh;
+    width:12px;
+    height:12px;
+    background: linear-gradient(140deg, #e79ab0, #a8405f);
+    border-radius: 60% 10% 60% 10%;
+    opacity:0;
+    animation: fall linear infinite;
+  }
+  @keyframes fall{
+    0%   { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity:0; }
+    10%  { opacity:.55; }
+    90%  { opacity:.35; }
+    100% { transform: translateY(112vh) translateX(var(--sway)) rotate(540deg); opacity:0; }
+  }
+
+  /* ---- Tarjeta ---- */
+  .card{
+    position:relative;
+    z-index:1;
+    width:min(430px, 100%);
+    background:
+      radial-gradient(circle at 50% 0%, #fffdf9 0%, var(--paper) 60%);
+    border-radius:20px;
+    box-shadow:
+      0 50px 80px -30px rgba(10,4,14,0.8),
+      0 0 0 1px rgba(224,200,138,0.22),
+      inset 0 0 0 1px rgba(255,255,255,0.5);
+    overflow:hidden;
+    animation: cardIn 1s cubic-bezier(.2,.75,.25,1) both;
+  }
+  @keyframes cardIn{
+    from{ opacity:0; transform: translateY(28px) scale(.97); }
+    to{ opacity:1; transform:none; }
+  }
+
+  .card::before{
+    content:"";
+    position:absolute;
+    inset:11px;
+    border:1px solid rgba(184,145,63,0.3);
+    border-radius:13px;
+    pointer-events:none;
+    z-index:3;
+  }
+
+  .card-body{
+    padding:40px 30px 26px;
+    min-height:390px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
+
+  /* ---- Pasos ---- */
+  .step{ display:none; flex-direction:column; gap:16px; }
+  .step.active{ display:flex; }
+  .step.active > *{
+    opacity:0;
+    animation: stepIn .6s cubic-bezier(.2,.75,.25,1) forwards;
+  }
+  .step.active > *:nth-child(1){ animation-delay:.05s; }
+  .step.active > *:nth-child(2){ animation-delay:.14s; }
+  .step.active > *:nth-child(3){ animation-delay:.23s; }
+  .step.active > *:nth-child(4){ animation-delay:.32s; }
+  .step.active > *:nth-child(5){ animation-delay:.41s; }
+  .step.active > *:nth-child(6){ animation-delay:.50s; }
+  .step.active > *:nth-child(7){ animation-delay:.59s; }
+  .step.active > *:nth-child(8){ animation-delay:.68s; }
+  .step.active > *:nth-child(9){ animation-delay:.77s; }
+  @keyframes stepIn{
+    from{ opacity:0; transform:translateY(14px); }
+    to{ opacity:1; transform:none; }
+  }
+
+  h1,h2{
+    font-family:"Cormorant Garamond", Georgia, serif;
+    font-weight:500;
+    color:var(--ink);
+    margin:0;
+    line-height:1.12;
+    letter-spacing:-0.01em;
+  }
+  h1{ font-size:36px; font-style:italic; }
+  h2{ font-size:29px; }
+
+  p{
+    margin:0;
+    font-size:15px;
+    line-height:1.6;
+    color:var(--ink-soft);
+    font-weight:300;
+  }
+  p.warm{
+    font-family:"Cormorant Garamond", Georgia, serif;
+    font-size:19px;
+    font-weight:400;
+    line-height:1.55;
+    color:#5c4354;
+  }
+
+  .rule{
+    width:52px;
+    height:1px;
+    background:linear-gradient(90deg, var(--gold), transparent);
+  }
+
+  .firma{
+    font-family:"Cormorant Garamond", Georgia, serif;
+    font-style:italic;
+    font-size:21px;
+    color:var(--rose);
+    text-align:right;
+    margin:0;
+  }
+
+  /* ---- Botones ---- */
+  .btn{
+    border:none;
+    cursor:pointer;
+    border-radius:11px;
+    padding:15px 20px;
+    font-family:"Jost", sans-serif;
+    font-size:15px;
+    font-weight:400;
+    letter-spacing:0.03em;
+    transition: background .25s ease, transform .18s cubic-bezier(.2,.8,.3,1), box-shadow .25s ease, opacity .2s ease;
+  }
+  .btn:hover:not(:disabled){ transform:translateY(-2px); }
+  .btn:active:not(:disabled){ transform:translateY(0) scale(.98); }
+  .btn:focus-visible{ outline:2px solid var(--gold); outline-offset:3px; }
+
+  .btn-primary{
+    background:linear-gradient(160deg, var(--rose), var(--rose-dark));
+    color:var(--paper);
+    box-shadow:0 12px 26px -12px rgba(125,39,64,0.85);
+  }
+  .btn-primary:hover:not(:disabled){ box-shadow:0 18px 32px -12px rgba(125,39,64,0.9); }
+  .btn-primary:disabled{ opacity:.34; cursor:not-allowed; box-shadow:none; }
+
+  .btn-ghost{
+    background:transparent;
+    color:var(--ink);
+    border:1px solid var(--line);
+  }
+  .btn-ghost:hover{ border-color:var(--gold); background:rgba(184,145,63,0.07); }
+
+  .btn-full{ width:100%; }
+
+  /* ---- Opciones de plan ---- */
+  .options{ display:flex; flex-direction:column; gap:9px; }
+  .option{
+    display:flex;
+    align-items:center;
+    gap:13px;
+    border:1px solid var(--line);
+    background:transparent;
+    border-radius:12px;
+    padding:14px 16px;
+    text-align:left;
+    cursor:pointer;
+    font-family:"Jost", sans-serif;
+    font-size:15px;
+    font-weight:300;
+    color:var(--ink);
+    transition: border-color .25s ease, background .25s ease, transform .18s ease;
+  }
+  .option:hover{ border-color:var(--gold-soft); transform:translateX(3px); }
+  .option .emoji{ font-size:21px; line-height:1; }
+  .option.selected{
+    border-color:var(--rose);
+    background:var(--rose-tint);
+    animation: pick .4s ease;
+  }
+  @keyframes pick{
+    0%{ transform:scale(1); }
+    45%{ transform:scale(1.028); }
+    100%{ transform:scale(1); }
+  }
+
+  /* ---- Flores ---- */
+  .yesno{ display:flex; gap:10px; }
+  .yesno .btn{ flex:1; }
+  .colors{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:10px;
+    overflow:hidden;
+    max-height:0;
+    opacity:0;
+    transition: max-height .5s cubic-bezier(.2,.8,.3,1), opacity .4s ease, margin .4s ease;
+  }
+  .colors.show{ max-height:170px; opacity:1; margin-top:2px; }
+  .swatch{
+    border:none;
+    background:none;
+    cursor:pointer;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    font-family:"Jost", sans-serif;
+    font-size:11.5px;
+    font-weight:300;
+    color:var(--ink-soft);
+  }
+  .swatch .dot-color{
+    width:38px; height:38px;
+    border-radius:50%;
+    box-shadow:0 0 0 1px rgba(46,27,43,0.14), 0 5px 12px -5px rgba(0,0,0,0.35);
+    transition: transform .25s cubic-bezier(.2,.8,.3,1), box-shadow .25s ease;
+  }
+  .swatch:hover .dot-color{ transform:scale(1.1); }
+  .swatch.selected .dot-color{
+    transform:scale(1.14);
+    box-shadow:0 0 0 2px var(--rose), 0 6px 14px -5px rgba(0,0,0,0.4);
+  }
+  .swatch.selected{ color:var(--ink); }
+
+  /* ---- Campos ---- */
+  .field{ display:flex; flex-direction:column; gap:7px; }
+  .field label{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    font-weight:300;
+    letter-spacing:0.04em;
+  }
+  .field input, .field textarea{
+    font-family:"Jost", sans-serif;
+    font-size:15px;
+    font-weight:300;
+    padding:13px 15px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,0.7);
+    color:var(--ink);
+    transition: border-color .25s ease, box-shadow .25s ease;
+  }
+  .field input:focus, .field textarea:focus{
+    outline:none;
+    border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(184,145,63,0.15);
+  }
+  .field textarea{ resize:vertical; min-height:80px; line-height:1.5; }
+  .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  /* ---- Si / No ---- */
+  .confirm{ position:relative; min-height:150px; }
+  .btn-yes{ position:relative; z-index:2; width:100%; }
+  .btn-no{
+    position:absolute;
+    top:68px; left:0;
+    z-index:1;
+    transition: top .35s cubic-bezier(.3,1.4,.5,1), left .35s cubic-bezier(.3,1.4,.5,1), transform .2s ease;
+  }
+
+  /* ---- Resumen ---- */
+  .summary{
+    background:linear-gradient(160deg, var(--paper-2), #ece0d0);
+    border-radius:13px;
+    padding:16px 18px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    box-shadow: inset 0 0 0 1px rgba(184,145,63,0.22);
+  }
+  .summary-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:14px;
+    font-size:14px;
+    font-weight:300;
+  }
+  .summary-row span:first-child{ color:var(--ink-soft); white-space:nowrap; }
+  .summary-row span:last-child{ text-align:right; color:var(--ink); }
+
+  .note{
+    font-size:13px;
+    line-height:1.55;
+    color:var(--ink-soft);
+    font-weight:300;
+    padding-left:12px;
+    border-left:2px solid var(--gold-soft);
+  }
+
+  .actions{ display:flex; flex-direction:column; gap:9px; }
+
+  .status{
+    font-size:13px;
+    text-align:center;
+    min-height:17px;
+    font-weight:300;
+    color:var(--ink-soft);
+    margin:0;
+  }
+  .status.ok{ color:var(--rose); }
+
+  /* ---- Pie ---- */
+  .footer{
+    border-top:1px solid rgba(46,27,43,0.1);
+    padding:14px 30px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    font-weight:300;
+    letter-spacing:0.06em;
+  }
+  .dots{ display:flex; gap:7px; }
+  .dot{
+    width:6px; height:6px;
+    border-radius:50%;
+    background:var(--line);
+    transition: background .4s ease, transform .4s cubic-bezier(.3,1.5,.5,1);
+  }
+  .dot.filled{ background:var(--rose); transform:scale(1.25); }
+
+  /* ---- Final ---- */
+  .final{ text-align:center; }
+  .heart{
+    font-size:42px;
+    animation: beat 1.8s ease-in-out infinite;
+    display:inline-block;
+  }
+  @keyframes beat{
+    0%,100%{ transform:scale(1); }
+    14%{ transform:scale(1.16); }
+    28%{ transform:scale(1); }
+    42%{ transform:scale(1.11); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration:.01ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:.01ms !important;
+    }
+    .step.active > *{ opacity:1; }
+    .petals{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="petals" id="petals"></div>
+
+<div class="card">
+  <div class="card-body">
+
+    <!-- 1 · Bienvenida -->
+    <div class="step active" data-step="1">
+      <h1>¿Sabe qué?</h1>
+      <div class="rule"></div>
+      <p class="warm">Mi nombre es Hesler. No soy de los que dicen estas cosas fácil, así que preferí hacerlo bien y decírselo de frente.</p>
+      <p class="warm">Siempre la he visto, y me parece una chica súper hermosa. Me gusta mucho, y no quería seguir dejándolo pasar sin que usted lo supiera.</p>
+      <p class="warm">Mi intención es sencilla y honesta: me encantaría conocerla. Saber cómo piensa, de qué se ríe, qué le gusta hacer. Nada más que eso, y nada menos.</p>
+      <p class="firma">— Hesler</p>
+      <div class="field">
+        <label for="nombre">Antes que nada, ¿cómo se llama?</label>
+        <input type="text" id="nombre" placeholder="Su nombre" autocomplete="given-name">
+      </div>
+      <button class="btn btn-primary btn-full" id="next1" onclick="goTo(2)" disabled>Continuar</button>
+    </div>
+
+    <!-- 2 · Plan -->
+    <div class="step" data-step="2">
+      <h2 id="ttlPlan">¿Qué le gustaría hacer?</h2>
+      <p class="warm">No quiero decidir yo por usted. Escoja lo que la haga sentir más cómoda, aunque sea solo hablar un rato en la Universidad. Cualquier opción que elija va a estar bien para mí.</p>
+      <div class="options" id="options">
+        <button class="option" data-plan="Ir al cine"><span class="emoji">🎬</span>Ir al cine</button>
+        <button class="option" data-plan="Ir a comer"><span class="emoji">🍝</span>Ir a comer</button>
+        <button class="option" data-plan="Ir por un helado"><span class="emoji">🍦</span>Ir por un helado</button>
+        <button class="option" data-plan="Salir a caminar"><span class="emoji">🌿</span>Salir a caminar</button>
+        <button class="option" data-plan="Hablar primero en la Universidad"><span class="emoji">🎓</span>Hablar primero en la Universidad</button>
+      </div>
+      <button class="btn btn-primary btn-full" id="next2" onclick="goTo(3)" disabled>Continuar</button>
+    </div>
+
+    <!-- 3 · Flores -->
+    <div class="step" data-step="3">
+      <h2>¿Le gustan las flores?</h2>
+      <p class="warm">Me gustaría llevarle flores el día que nos veamos. No para impresionarla, sino porque quiero ganarme su corazón con los detalles pequeños. Si me dice que sí, dígame cuáles son sus favoritas.</p>
+      <div class="yesno">
+        <button class="btn btn-ghost" id="flowYes" onclick="setFlores(true)">Sí</button>
+        <button class="btn btn-ghost" id="flowNo" onclick="setFlores(false)">No</button>
+      </div>
+      <div class="colors" id="colors">
+        <button class="swatch" data-color="Rojas"><span class="dot-color" style="background:linear-gradient(150deg,#d3405c,#8e1b34)"></span>Rojas</button>
+        <button class="swatch" data-color="Rosadas"><span class="dot-color" style="background:linear-gradient(150deg,#f5aec2,#dd6f92)"></span>Rosadas</button>
+        <button class="swatch" data-color="Blancas"><span class="dot-color" style="background:linear-gradient(150deg,#ffffff,#e6ddd2)"></span>Blancas</button>
+        <button class="swatch" data-color="Amarillas"><span class="dot-color" style="background:linear-gradient(150deg,#f7d271,#dda52c)"></span>Amarillas</button>
+        <button class="swatch" data-color="Lilas"><span class="dot-color" style="background:linear-gradient(150deg,#c9a8e8,#8f63c4)"></span>Lilas</button>
+        <button class="swatch" data-color="Girasoles"><span class="dot-color" style="background:linear-gradient(150deg,#ffc93c,#c07b12)"></span>Girasoles</button>
+        <button class="swatch" data-color="Tulipanes"><span class="dot-color" style="background:linear-gradient(150deg,#ef8ea8,#b93f66)"></span>Tulipanes</button>
+        <button class="swatch" data-color="Sorpresa"><span class="dot-color" style="background:linear-gradient(150deg,#e8c9a0,#b8913f)"></span>Sorpresa</button>
+      </div>
+      <button class="btn btn-primary btn-full" id="next3" onclick="goTo(4)" disabled>Continuar</button>
+    </div>
+
+    <!-- 4 · Fecha y hora -->
+    <div class="step" data-step="4">
+      <h2>¿Cuándo nos vemos?</h2>
+      <p class="warm">Le confieso que me haría muchísima ilusión verla. Toque el primer recuadro para elegir el día, y el segundo para la hora. Escoja el momento que a usted le quede mejor, yo me acomodo a lo que usted diga.</p>
+      <div class="field">
+        <label for="fecha">Fecha</label>
+        <input type="date" id="fecha">
+      </div>
+      <div class="field">
+        <label for="hora">Hora</label>
+        <input type="time" id="hora">
+      </div>
+      <button class="btn btn-primary btn-full" id="next4" onclick="goTo(5)" disabled>Continuar</button>
+    </div>
+
+    <!-- 5 · Confirmación -->
+    <div class="step" data-step="5">
+      <h2 id="ttlConfirm">Entonces… ¿acepta?</h2>
+      <p class="warm">Ya llegamos hasta aquí, y le voy a ser sincero: hice toda esta página con la esperanza de llegar a este momento. Le advierto que ese botón de "No" es bien escurridizo.</p>
+      <div class="confirm" id="confirmBox">
+        <button class="btn btn-primary btn-yes" onclick="goTo(6)">Sí, acepto</button>
+        <button class="btn btn-ghost btn-no" id="btnNo">No</button>
+      </div>
+    </div>
+
+    <!-- 6 · Resumen -->
+    <div class="step" data-step="6">
+      <h2 id="ttlResumen">Quedamos así</h2>
+      <p class="warm">No sabe el gusto que me da leer esto. Revise que todo esté como usted lo quiere.</p>
+      <div class="summary">
+        <div class="summary-row"><span>Nombre</span><span id="resNombre">—</span></div>
+        <div class="summary-row"><span>Plan</span><span id="resPlan">—</span></div>
+        <div class="summary-row"><span>Flores</span><span id="resFlores">—</span></div>
+        <div class="summary-row"><span>Fecha</span><span id="resFecha">—</span></div>
+        <div class="summary-row"><span>Hora</span><span id="resHora">—</span></div>
+      </div>
+      <div class="field">
+        <label for="comentario">¿Quiere agregar algo más? (opcional)</label>
+        <textarea id="comentario" placeholder="Escríbame lo que quiera…"></textarea>
+      </div>
+      <div class="field">
+        <label for="telefono">Su número, por si quiere que yo la busque (opcional)</label>
+        <input type="tel" id="telefono" placeholder="Ej. 9999 9999" inputmode="tel">
+      </div>
+      <p class="note">Al agendar, todo esto me llega directo a mi correo. Y si prefiere decírmelo usted misma, puede escribirme por WhatsApp con el botón de abajo.</p>
+      <div class="actions">
+        <button class="btn btn-primary btn-full" id="btnAgendar" onclick="agendar()">Agendar la cita</button>
+        <p class="status" id="status"></p>
+        <button class="btn btn-ghost btn-full" onclick="abrirWhatsapp()">Escribirme por WhatsApp</button>
+      </div>
+    </div>
+
+    <!-- 7 · Final -->
+    <div class="step final" data-step="7">
+      <span class="heart">❤️</span>
+      <h2 id="ttlFinal">Gracias</h2>
+      <p class="warm" id="txtFinal">Gracias por darme la oportunidad. Ya me llegó su respuesta, y le prometo que voy a estar contando los días.</p>
+      <button class="btn btn-ghost btn-full" onclick="abrirWhatsapp()">Escribirme por WhatsApp</button>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <span id="stepLabel">1 de 6</span>
+    <div class="dots" id="dots">
+      <div class="dot filled"></div><div class="dot"></div><div class="dot"></div>
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ====== Personalice aquí ====== */
+  const CONFIG = {
+    correoDestino: "heslerorivera@gmail.com",
+    whatsappNumero: "50493087631",   // +504, sin espacios ni el signo +
+    remitente: "Hesler"
+  };
+  /* ============================== */
+
+  let planElegido = null;
+  let floresRespuesta = null;   // "Sí" | "No"
+  let floresColor = null;
+
+  const nombreInput = document.getElementById('nombre');
+  const fechaInput  = document.getElementById('fecha');
+  const horaInput   = document.getElementById('hora');
+  const colorsBox   = document.getElementById('colors');
+
+  /* ---- Pétalos ---- */
+  (function crearPetalos(){
+    const cont = document.getElementById('petals');
+    const total = window.innerWidth < 500 ? 12 : 20;
+    for(let i=0; i<total; i++){
+      const p = document.createElement('div');
+      p.className = 'petal';
+      const size = 7 + Math.random()*11;
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      p.style.left = Math.random()*100 + 'vw';
+      p.style.setProperty('--sway', (Math.random()*160 - 80) + 'px');
+      p.style.animationDuration = (11 + Math.random()*14) + 's';
+      p.style.animationDelay = (Math.random()*18) + 's';
+      p.style.filter = 'blur(' + (Math.random()*1.1) + 'px)';
+      cont.appendChild(p);
+    }
+  })();
+
+  /* ---- Navegación ---- */
+  function goTo(step){
+    const actual = document.querySelector('.step.active');
+    if(actual) actual.classList.remove('active');
+    const nuevo = document.querySelector('.step[data-step="'+step+'"]');
+    void nuevo.offsetWidth;           // reinicia las animaciones
+    nuevo.classList.add('active');
+
+    const nombre = nombreInput.value.trim();
+    if(step === 2 && nombre) document.getElementById('ttlPlan').textContent = '¿Qué le gustaría hacer, ' + nombre + '?';
+    if(step === 5 && nombre) document.getElementById('ttlConfirm').textContent = 'Entonces… ¿acepta, ' + nombre + '?';
+    if(step === 6){
+      if(nombre) document.getElementById('ttlResumen').textContent = 'Quedamos así, ' + nombre;
+      llenarResumen();
+    }
+    if(step === 7 && nombre) document.getElementById('ttlFinal').textContent = 'Gracias, ' + nombre;
+
+    const label = document.getElementById('stepLabel');
+    if(step <= 6){
+      label.textContent = step + ' de 6';
+      document.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('filled', i < step));
+    } else {
+      label.textContent = 'Completado';
+      document.querySelectorAll('.dot').forEach(d => d.classList.add('filled'));
+    }
+    document.querySelector('.card').scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+
+  /* ---- Paso 1 ---- */
+  nombreInput.addEventListener('input', () => {
+    document.getElementById('next1').disabled = !nombreInput.value.trim();
+  });
+  nombreInput.addEventListener('keydown', e => {
+    if(e.key === 'Enter' && nombreInput.value.trim()) goTo(2);
+  });
+
+  /* ---- Paso 2 ---- */
+  document.querySelectorAll('.option').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+      btn.classList.add('selected');
+      planElegido = btn.dataset.plan;
+      document.getElementById('next2').disabled = false;
+    });
+  });
+
+  /* ---- Paso 3 · Flores ---- */
+  function setFlores(sí){
+    floresRespuesta = sí ? 'Sí' : 'No';
+    document.getElementById('flowYes').classList.toggle('btn-primary', sí);
+    document.getElementById('flowYes').classList.toggle('btn-ghost', !sí);
+    document.getElementById('flowNo').classList.toggle('btn-primary', !sí);
+    document.getElementById('flowNo').classList.toggle('btn-ghost', sí);
+
+    if(sí){
+      colorsBox.classList.add('show');
+      document.getElementById('next3').disabled = !floresColor;
+    } else {
+      colorsBox.classList.remove('show');
+      floresColor = null;
+      document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
+      document.getElementById('next3').disabled = false;
+    }
+  }
+
+  document.querySelectorAll('.swatch').forEach(sw => {
+    sw.addEventListener('click', () => {
+      document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
+      sw.classList.add('selected');
+      floresColor = sw.dataset.color;
+      document.getElementById('next3').disabled = false;
+    });
+  });
+
+  /* ---- Paso 4 ---- */
+  function revisarPaso4(){
+    document.getElementById('next4').disabled = !(fechaInput.value && horaInput.value);
+  }
+  fechaInput.addEventListener('change', revisarPaso4);
+  horaInput.addEventListener('change', revisarPaso4);
+  fechaInput.min = new Date().toISOString().split('T')[0];
+
+  /* ---- Paso 5 · el "No" se escapa ---- */
+  const btnNo = document.getElementById('btnNo');
+  const confirmBox = document.getElementById('confirmBox');
+  function esquivar(){
+    const caja = confirmBox.getBoundingClientRect();
+    const b = btnNo.getBoundingClientRect();
+    const maxX = Math.max(0, caja.width  - b.width  - 6);
+    const maxY = Math.max(0, caja.height - b.height - 6);
+    btnNo.style.left = (Math.random()*maxX) + 'px';
+    btnNo.style.top  = (Math.random()*maxY) + 'px';
+  }
+  btnNo.addEventListener('pointerenter', esquivar);
+  btnNo.addEventListener('focus', esquivar);
+  btnNo.addEventListener('touchstart', e => { e.preventDefault(); esquivar(); }, {passive:false});
+  btnNo.addEventListener('click', e => { e.preventDefault(); esquivar(); });
+
+  /* ---- Formatos ---- */
+  function formatFecha(iso){
+    if(!iso) return '—';
+    const [y,m,d] = iso.split('-');
+    return new Date(y, m-1, d).toLocaleDateString('es-HN', { weekday:'long', day:'numeric', month:'long' });
+  }
+  function formatHora(t){
+    if(!t) return '—';
+    const [h,m] = t.split(':');
+    const f = new Date(); f.setHours(h, m);
+    return f.toLocaleTimeString('es-HN', { hour:'numeric', minute:'2-digit', hour12:true });
+  }
+  function textoFlores(){
+    if(floresRespuesta === 'Sí') return 'Sí — ' + (floresColor || 'sin color elegido');
+    if(floresRespuesta === 'No') return 'No';
+    return '—';
+  }
+
+  /* ---- Paso 6 ---- */
+  function llenarResumen(){
+    document.getElementById('resNombre').textContent = nombreInput.value.trim() || '—';
+    document.getElementById('resPlan').textContent   = planElegido || '—';
+    document.getElementById('resFlores').textContent = textoFlores();
+    document.getElementById('resFecha').textContent  = formatFecha(fechaInput.value);
+    document.getElementById('resHora').textContent   = formatHora(horaInput.value);
+  }
+
+  function mensajeTexto(){
+    const nombre = nombreInput.value.trim();
+    const comentario = document.getElementById('comentario').value.trim();
+    const telefono = document.getElementById('telefono').value.trim();
+    let txt = '¡' + nombre + ' dijo que sí! 💌\n\n';
+    txt += 'Nombre: ' + nombre + '\n';
+    txt += 'Plan: ' + planElegido + '\n';
+    txt += 'Flores: ' + textoFlores() + '\n';
+    txt += 'Fecha: ' + formatFecha(fechaInput.value) + '\n';
+    txt += 'Hora: ' + formatHora(horaInput.value);
+    if(telefono)   txt += '\nSu número: ' + telefono;
+    if(comentario) txt += '\n\nComentario:\n' + comentario;
+    return txt;
+  }
+
+  async function agendar(){
+    const btn = document.getElementById('btnAgendar');
+    const estado = document.getElementById('status');
+    const nombre = nombreInput.value.trim();
+    btn.disabled = true;
+    btn.textContent = 'Enviando…';
+    estado.className = 'status';
+    estado.textContent = '';
+
+    const datos = new FormData();
+    datos.append('Nombre', nombre);
+    datos.append('Plan', planElegido);
+    datos.append('Flores', textoFlores());
+    datos.append('Fecha', formatFecha(fechaInput.value));
+    datos.append('Hora', formatHora(horaInput.value));
+    datos.append('Su número', document.getElementById('telefono').value.trim() || 'No lo dejó');
+    datos.append('Comentario', document.getElementById('comentario').value.trim() || 'Sin comentario');
+    datos.append('_subject', nombre + ' dijo que sí 💌');
+    datos.append('_template', 'table');
+    datos.append('_captcha', 'false');
+
+    try{
+      const res = await fetch('https://formsubmit.co/ajax/' + CONFIG.correoDestino, {
+        method:'POST',
+        headers:{ 'Accept':'application/json' },
+        body: datos
+      });
+      if(!res.ok) throw new Error('fallo');
+      goTo(7);
+      document.getElementById('txtFinal').textContent =
+        'Gracias por darme la oportunidad. Su respuesta ya le llegó a ' + CONFIG.remitente + ', y le prometo que va a estar contando los días.';
+    } catch(err){
+      const asunto = encodeURIComponent(nombre + ' dijo que sí 💌');
+      const cuerpo = encodeURIComponent(mensajeTexto());
+      window.location.href = 'mailto:' + CONFIG.correoDestino + '?subject=' + asunto + '&body=' + cuerpo;
+      btn.disabled = false;
+      btn.textContent = 'Agendar la cita';
+      estado.textContent = 'No se pudo enviar directo. Se abrió su correo.';
+    }
+  }
+
+  function abrirWhatsapp(){
+    window.open('https://wa.me/' + CONFIG.whatsappNumero + '?text=' + encodeURIComponent(mensajeTexto()), '_blank');
+  }
+</script>
+
+</body>
+</html>
